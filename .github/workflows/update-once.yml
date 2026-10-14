@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  actions: write
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -17,6 +18,10 @@ jobs:
           EXPECTED_SHA256: 967a7d461aba95775f5211bea29b0b7b77b49964ee6e875328864877c003ec4b
         run: |
           set -euo pipefail
+          if grep -q '"revision": "1b553bfe88188fd9"' build-meta.json 2>/dev/null; then
+            echo "Correct tested revision already imported"
+            exit 0
+          fi
           curl --silent --show-error --fail --location --retry 3 --connect-timeout 10 --max-time 100 "$ARTIFACT_DOWNLOAD" -o /tmp/lonkoll-tested.zip
           printf "%s  %s\n" "$EXPECTED_SHA256" /tmp/lonkoll-tested.zip | sha256sum --check
           python3 - <<'PY'
@@ -46,3 +51,7 @@ jobs:
             git commit -m "deploy: verified employer-calendar release"
             git push origin HEAD:main
           fi
+      - name: Dispatch public Pages workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
