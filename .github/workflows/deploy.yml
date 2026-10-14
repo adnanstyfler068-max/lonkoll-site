@@ -1,0 +1,67 @@
+name: Publish LönKoll public website
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'assets/**'
+      - 'icons/**'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+      - 'offline.html'
+      - 'offline.css'
+      - 'build-meta.json'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: lonkoll-public-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate static distribution
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s sw.js
+          test -s build-meta.json
+          test -s assets/app.js
+          test -s manifest.webmanifest
+          node -e "let x=require('./build-meta.json'); if(x.application !== 'LönKoll Sverige'||!x.revision||!Array.isArray(x.assets)) process.exit(1); console.log('LönKoll distribution revision:', x.revision)"
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify published version
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          base="${SITE_URL%/}"
+          for attempt in $(seq 1 12); do
+            if curl --fail --location --silent --show-error --max-time 15 "$base/" -o /tmp/lonkoll-home.html \
+              && curl --fail --location --silent --show-error --max-time 15 "$base/build-meta.json" -o /tmp/lonkoll-build.json \
+              && grep -q 'LönKoll Sverige' /tmp/lonkoll-home.html \
+              && cmp -s build-meta.json /tmp/lonkoll-build.json; then
+              echo "Public LönKoll website verified: $base/"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Site not accessible or deployed revision mismatch"
+          exit 1
