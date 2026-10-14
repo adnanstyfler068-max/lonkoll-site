@@ -1,0 +1,48 @@
+name: One-time verified LönKoll release import
+on:
+  push:
+    paths: ['.github/workflows/update-once.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import exact verified private CI artifact
+        env:
+          ARTIFACT_DOWNLOAD: https://sdmntprnortheu.oaiusercontent.com/files/00000000-3320-81f4-95c7-18cd5a6f1cad/raw?se=2026-10-14T20%3A58%3A22Z&sp=r&sv=2026-02-06&sr=b&scid=9edd55fb-6e5c-533c-b911-7345dc9121b2&skoid=e5e3659d-4463-4dbf-b2ce-ee32bc0a0a8d&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-14T05%3A14%3A08Z&ske=2026-10-15T05%3A14%3A08Z&sks=b&skv=2026-02-06&sig=C5EGOUtE94FEuz51J0%2BWG6E4nqcZdzJ8LZVDgkMuj9k%3D
+          EXPECTED_SHA256: 967a7d461aba95775f5211bea29b0b7b77b49964ee6e875328864877c003ec4b
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --retry 3 --connect-timeout 10 --max-time 100 "$ARTIFACT_DOWNLOAD" -o /tmp/lonkoll-tested.zip
+          printf "%s  %s\n" "$EXPECTED_SHA256" /tmp/lonkoll-tested.zip | sha256sum --check
+          python3 - <<'PY'
+          from zipfile import ZipFile
+          from pathlib import PurePosixPath,Path
+          import shutil
+          path=Path('/tmp/lonkoll-tested.zip')
+          with ZipFile(path) as z:
+              all_files=z.infolist()
+              names={x.filename for x in all_files}
+              assert all(name in names for name in ('index.html','build-meta.json','sw.js','assets/app.js'))
+              assert len(all_files) < 200
+              assert all(not x.filename.startswith('/') and '..' not in PurePosixPath(x.filename).parts for x in all_files)
+              assert sum(x.file_size for x in all_files) < 20_000_000
+              assert all((x.external_attr>>16)&0o170000 != 0o120000 for x in all_files)
+              for f in Path('.').iterdir():
+                  if f.name in ('.github','.git','README.md'): continue
+                  if f.is_dir(): shutil.rmtree(f)
+                  else: f.unlink()
+              z.extractall('.')
+          Path('.nojekyll').touch()
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A .
+          if ! git diff --cached --quiet; then
+            git commit -m "deploy: verified employer-calendar release"
+            git push origin HEAD:main
+          fi
