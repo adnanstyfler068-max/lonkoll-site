@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">LönKoll Sverige</title>
+  <desc id="description">Ett stiliserat L och K framför en grön kalender.</desc>
+  <rect width="512" height="512" rx="112" fill="#0b5c4b"/>
+  <path d="M112 102h288a36 36 0 0 1 36 36v260a36 36 0 0 1-36 36H112a36 36 0 0 1-36-36V138a36 36 0 0 1 36-36Z" fill="#fff"/>
+  <path d="M76 181h360v-43a36 36 0 0 0-36-36H112a36 36 0 0 0-36 36v43Z" fill="#f2c94c"/>
+  <path d="M160 76v55M352 76v55" fill="none" stroke="#173f35" stroke-linecap="round" stroke-width="30"/>
+  <path d="M153 233v126h75M275 233v126M362 233l-87 66 94 60" fill="none" stroke="#0b5c4b" stroke-linecap="round" stroke-linejoin="round" stroke-width="35"/>
+</svg>

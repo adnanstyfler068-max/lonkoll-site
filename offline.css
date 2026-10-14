@@ -1,0 +1,82 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f8f6;
+  color: #15302a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  margin: 0;
+  padding: max(1.5rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+  display: grid;
+  place-items: center;
+}
+
+.offline-card {
+  inline-size: min(100%, 30rem);
+  padding: clamp(1.5rem, 8vw, 3rem);
+  border: 1px solid #c8d7d1;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 1rem 3rem rgb(23 63 53 / 12%);
+  text-align: center;
+}
+
+.offline-card img {
+  border-radius: 1.25rem;
+}
+
+h1 {
+  margin-block: 1.25rem 0.5rem;
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  line-height: 1.1;
+}
+
+p {
+  margin-block: 0.75rem;
+  line-height: 1.55;
+}
+
+.retry-link {
+  display: inline-block;
+  min-block-size: 2.75rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  background: #0b5c4b;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.retry-link:focus-visible {
+  outline: 3px solid #f2c94c;
+  outline-offset: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background: #10211d;
+    color: #edf7f3;
+  }
+
+  .offline-card {
+    border-color: #3b5d53;
+    background: #17362e;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
