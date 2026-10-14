@@ -5,6 +5,7 @@ import { renderOnboarding } from "./pages/onboarding.js";
 import { renderCalendar, renderHome } from "./pages/home-calendar.js";
 import { renderShiftDetail, renderShiftForm } from "./pages/shift.js";
 import { renderSummaries } from "./pages/summary.js";
+import { renderEmployerCalendarImport } from "./pages/employer-calendar.js";
 import { renderAgreementCatalog, renderData, renderEmployers, renderInstall, renderProfile, renderRates, renderRecurrences, renderRules, renderSettings, renderTax } from "./pages/settings.js";
 export * from "./types.js";
 export { href, navigate, parseRoute } from "./router.js";
@@ -237,6 +238,9 @@ class LonkollUI {
                 break;
             case "agreement-catalog":
                 page = renderAgreementCatalog(ctx);
+                break;
+            case "employer-calendar-import":
+                page = renderEmployerCalendarImport(ctx);
                 break;
             case "install":
                 page = renderInstall(ctx);

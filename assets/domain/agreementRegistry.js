@@ -181,6 +181,27 @@ export function resolveVerifiedObRules(id, date, versions = []) {
         };
     }
 }
+export const AGREEMENT_PAY_COMPONENTS = Object.freeze([
+    "base",
+    "ob",
+    "overtime",
+    "mertid",
+    "holidays",
+    "vacation",
+    "sick-pay",
+    "standby",
+    "oncall",
+    "travel",
+    "allowances",
+    "pension"
+]);
+export function agreementCoverage(agreementId, date, versions = []) {
+    const ob = resolveVerifiedObRules(agreementId, date, versions).status === "verified" ? "verified-ob-only" : "not-verified";
+    return Object.freeze(Object.fromEntries(AGREEMENT_PAY_COMPONENTS.map((c)=>[
+            c,
+            c === "ob" ? ob : "not-verified"
+        ])));
+}
 
 
 //# sourceURL=domain/agreementRegistry.ts

@@ -1,6 +1,6 @@
 {
   "application": "LönKoll Sverige",
-  "revision": "1e3cd853d246cb9a",
+  "revision": "1b553bfe88188fd9",
   "assets": [
     {
       "url": "./assets/app.js",
@@ -8,15 +8,19 @@
     },
     {
       "url": "./assets/application/adapter.js",
-      "revision": "271e234cbe4c4f00"
+      "revision": "950edac8d2aae64a"
     },
     {
       "url": "./assets/domain/agreementRegistry.js",
-      "revision": "c2efac80ecb568ee"
+      "revision": "1ae468a3dcdd5896"
     },
     {
       "url": "./assets/domain/decimal.js",
       "revision": "03b3eb8f5feececf"
+    },
+    {
+      "url": "./assets/domain/employerCalendar.js",
+      "revision": "b178cb509e2afbf2"
     },
     {
       "url": "./assets/domain/employmentProfile.js",
@@ -116,11 +120,15 @@
     },
     {
       "url": "./assets/ui/index.js",
-      "revision": "a1901bf62a243de9"
+      "revision": "e55324bbab329ae7"
     },
     {
       "url": "./assets/ui/page-context.js",
       "revision": "36be9ff9509df689"
+    },
+    {
+      "url": "./assets/ui/pages/employer-calendar.js",
+      "revision": "2e0d9b5f862c45a4"
     },
     {
       "url": "./assets/ui/pages/home-calendar.js",
@@ -132,7 +140,7 @@
     },
     {
       "url": "./assets/ui/pages/settings.js",
-      "revision": "787dea2bf079aff2"
+      "revision": "bed5fa4488147530"
     },
     {
       "url": "./assets/ui/pages/shared.js",
@@ -148,7 +156,7 @@
     },
     {
       "url": "./assets/ui/router.js",
-      "revision": "7a79ba2c0be113bd"
+      "revision": "7c2394643cb12a0d"
     },
     {
       "url": "./assets/ui/types.js",

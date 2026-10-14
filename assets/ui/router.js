@@ -73,6 +73,9 @@ export function parseRoute(hash = window.location.hash) {
     if (parts[0] === "settings" && parts[1] === "data") return {
         name: "data"
     };
+    if (parts[0] === "settings" && parts[1] === "employer-calendar") return {
+        name: "employer-calendar-import"
+    };
     if (parts[0] === "settings" && parts[1] === "agreement-catalog") return {
         name: "agreement-catalog"
     };

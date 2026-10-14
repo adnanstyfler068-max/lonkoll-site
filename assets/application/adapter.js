@@ -1460,6 +1460,90 @@ export class BrowserPlanningAdapter {
             })));
         return preview;
     }
+    #planEmployerSchedule(archive, input) {
+        if (input.timeZone !== "Europe/Stockholm" || !Array.isArray(input.shifts) || input.shifts.length === 0 || input.shifts.length > 200) throw new Domain.DomainError("invalidText");
+        const employment = archive.employments.find((item)=>item.employerId === input.employerId);
+        if (!employment) throw new Domain.DomainError("missingEmployment");
+        const repository = Domain.InMemoryPlanningRepository.fromArchive(storageArchiveToDomain(archive));
+        const createDates = [];
+        const conflictDates = [];
+        const createdIDs = [];
+        const shifts = [
+            ...input.shifts
+        ].sort((a, b)=>(a.date + a.startTime).localeCompare(b.date + b.startTime));
+        for (const imported of shifts){
+            const start = Domain.resolveLocalTime(parseDate(imported.date), minuteFromText(imported.startTime), 0, input.timeZone);
+            const end = Domain.resolveLocalTime(parseDate(imported.endDate), minuteFromText(imported.endTime), 0, input.timeZone);
+            const existing = repository.activeStates().some((item)=>item.shift.employmentID === employment.id && Domain.epochSeconds(item.shift.start) < Domain.epochSeconds(end) && Domain.epochSeconds(item.shift.end) > Domain.epochSeconds(start));
+            if (existing) {
+                conflictDates.push(imported.date);
+                continue;
+            }
+            const inputShift = {
+                employerId: input.employerId,
+                rateVersionId: input.rateVersionId,
+                ruleSetVersionId: input.ruleSetVersionId,
+                date: imported.date,
+                startTime: imported.startTime,
+                endDate: imported.endDate,
+                endTime: imported.endTime,
+                timeZone: input.timeZone,
+                status: "planned",
+                breaks: [
+                    ...imported.breaks
+                ]
+            };
+            const id = Domain.makeID();
+            const shift = {
+                id,
+                employmentID: employment.id,
+                payRateVersionID: input.rateVersionId,
+                ruleSetVersionID: input.ruleSetVersionId ?? null,
+                start,
+                end,
+                timeZoneID: input.timeZone,
+                breaks: this.#breaksFromInput(inputShift, start, end),
+                status: "planned"
+            };
+            repository.create(shift);
+            createdIDs.push(id);
+            createDates.push(imported.date);
+        }
+        return {
+            archive: archiveWithDomain(archive, repository.archive()),
+            preview: {
+                createDates,
+                conflictDates,
+                importedCount: createDates.length,
+                skippedCount: conflictDates.length
+            },
+            createdIDs
+        };
+    }
+    async previewEmployerSchedule(input) {
+        return this.#planEmployerSchedule(structuredClone((await this.#current()).archive), input).preview;
+    }
+    async applyEmployerSchedule(input) {
+        let result = {
+            createDates: [],
+            conflictDates: [],
+            importedCount: 0,
+            skippedCount: 0
+        };
+        let ids = [];
+        await this.#mutate((archive)=>{
+            const planned = this.#planEmployerSchedule(archive, input);
+            result = planned.preview;
+            ids = planned.createdIDs;
+            return planned.archive;
+        });
+        if (ids.length) await this.#store.saveShiftStatusModes?.(ids.map((shiftId)=>({
+                shiftId,
+                mode: "automatic",
+                updatedAt: nowInstant()
+            })));
+        return result;
+    }
     async saveShift(input) {
         let savedID = "";
         await this.#mutate((archive)=>{

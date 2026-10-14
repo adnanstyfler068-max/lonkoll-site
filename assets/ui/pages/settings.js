@@ -1,5 +1,5 @@
 import { button, el, field } from "../dom.js";
-import { AGREEMENT_FAMILIES, agreementFamiliesFor } from "../../domain/agreementRegistry.js";
+import { AGREEMENT_FAMILIES, AGREEMENT_PAY_COMPONENTS, agreementCoverage, agreementFamiliesFor } from "../../domain/agreementRegistry.js";
 import { readWorkspaceMode, saveWorkspaceMode } from "../../domain/workspace.js";
 import { formatDate, formatMoney } from "../format.js";
 import { isLanguage } from "../../i18n/index.js";
@@ -66,7 +66,7 @@ export function renderSettings(ctx) {
     }, el("nav", {
         className: "settings-list",
         "aria-label": ctx.t("settings.title")
-    }, settingsLink("settings/profile", ctx.t("settings.profile")), settingsLink("settings/agreement-catalog", ctx.language === "sv" ? "Avtalskatalog: privat/offentlig sektor" : "Agreement catalogue: private/public sector"), settingsLink("settings/employers", ctx.t("settings.employers"), `${ctx.snapshot.employers.length}`), settingsLink("settings/rates", ctx.t("settings.rates"), `${ctx.snapshot.rates.length}`), settingsLink("settings/rules", ctx.t("settings.rules"), `${ctx.snapshot.ruleSets.length}`), settingsLink("settings/recurrences", ctx.t("settings.recurrences"), `${ctx.snapshot.recurrences.length}`), settingsLink("settings/tax", ctx.t("settings.tax"), undefined, "settings-tax"), settingsLink("settings/data", ctx.t("settings.data"), undefined, "settings-data"), settingsLink("settings/install", ctx.t("settings.install"))), el("section", {
+    }, settingsLink("settings/profile", ctx.t("settings.profile")), settingsLink("settings/employer-calendar", ctx.language === "sv" ? "Importera arbetsgivarens schema (.ics / .csv)" : "Import employer schedule (.ics / .csv)", undefined, "settings-roster"), settingsLink("settings/agreement-catalog", ctx.language === "sv" ? "Avtalskatalog: privat/offentlig sektor" : "Agreement catalogue: private/public sector"), settingsLink("settings/employers", ctx.t("settings.employers"), `${ctx.snapshot.employers.length}`), settingsLink("settings/rates", ctx.t("settings.rates"), `${ctx.snapshot.rates.length}`), settingsLink("settings/rules", ctx.t("settings.rules"), `${ctx.snapshot.ruleSets.length}`), settingsLink("settings/recurrences", ctx.t("settings.recurrences"), `${ctx.snapshot.recurrences.length}`), settingsLink("settings/tax", ctx.t("settings.tax"), undefined, "settings-tax"), settingsLink("settings/data", ctx.t("settings.data"), undefined, "settings-data"), settingsLink("settings/install", ctx.t("settings.install"))), el("section", {
         className: "notice",
         "aria-labelledby": "about-estimate"
     }, el("h2", {
@@ -1662,7 +1662,22 @@ export function renderAgreementCatalog(ctx) {
     }), field(lang === "sv" ? "Arbetsgivarsektor" : "Employer sector", sector), el("p", {
         className: "notice",
         text: lang === "sv" ? "Avtalsnamn är endast möjliga avtalsfamiljer. Inga OB-, övertids-, semester-, jour- eller andra nivåer antas utan kontrollerade källor." : "Agreement names are candidates only. No premium, overtime, vacation or standby amounts are assumed without verified sources."
-    }), agreementList)));
+    }), agreementList), el("section", {
+        className: "form-card stack",
+        dataset: {
+            testid: "agreement-coverage"
+        }
+    }, el("h2", {
+        text: lang === "sv" ? "Lönedelarnas verifieringsstatus" : "Salary component verification"
+    }), el("p", {
+        className: "warning",
+        text: lang === "sv" ? "Samtliga avtal kräver kontroll av avtalstext, avtalsperiod och lokala villkor. Sektorsvalet fastställer aldrig OB eller andra ersättningar automatiskt." : "Every agreement requires verification of official text, effective dates and local terms. Sector alone never certifies any premium or allowance."
+    }), el("ul", {}, AGREEMENT_PAY_COMPONENTS.map((component)=>el("li", {
+            text: `${component}: ${agreementCoverage("handels-lager", ctx.snapshot.today)[component] === "not-verified" ? lang === "sv" ? "ej verifierat" : "not verified" : lang === "sv" ? "kontrollerat" : "verified"}`
+        }))), el("a", {
+        href: href("settings/rules"),
+        text: lang === "sv" ? "Konfigurera kontrollerade OB-regler" : "Configure verified OB rules"
+    }))));
 }
 
 
